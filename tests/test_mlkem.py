@@ -49,3 +49,12 @@ def test_dk_hash_incoherent():
     bad[384 * p.k + 5] ^= 1          # on abîme la copie de ek dans dk
     with pytest.raises(ValueError):
         mlkem.decaps(bytes(bad), c, p)
+@pytest.mark.parametrize("p", ALL)
+def test_taux_echec(p):
+    echecs = 0
+    for _ in range(1000):
+        ek, dk = mlkem.keygen(p)
+        K, c = mlkem.encaps(ek, p)
+        if mlkem.decaps(dk, c, p) != K:
+            echecs += 1
+    assert echecs == 0
