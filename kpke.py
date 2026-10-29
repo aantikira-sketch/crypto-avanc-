@@ -152,8 +152,8 @@ def k_pke_encrypt(ek: bytes, m: bytes, r: bytes, p=ML_KEM_512):
     u = []
 
     for i in range(p.k):
-        column = [A_hat[j][i] for j in range(p.k)]
-        product = _dot_ntt(column, y_hat)
+        row = A_hat[i]
+        product = _dot_ntt(row, y_hat)
         u.append(poly_add(ntt_inverse(product), e1[i]))
 
     # v = NTT^-1(t^T * NTT(y)) + e2 + Decompress(1, m).
