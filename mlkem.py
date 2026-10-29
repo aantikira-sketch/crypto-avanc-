@@ -1,6 +1,6 @@
 import hashlib, os
 from hmac import compare_digest
-import kpke          # plus tard : import kpke
+import kpke
 
 def G(x): return hashlib.sha3_512(x).digest()        # 64 octets
 def H(x): return hashlib.sha3_256(x).digest()        # 32 octets
