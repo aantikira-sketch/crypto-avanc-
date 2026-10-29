@@ -5,7 +5,8 @@ Implémentation pédagogique inspirée de FIPS 203.
 
 import hashlib
 
-from params import Q, ML_KEM_512
+from params import ML_KEM_512
+Q = 3329
 from sampling import PRF, SampleNTT, SamplePolyCBD
 from encoding import ByteEncode, ByteDecode, Compress, Decompress
 from poly import ntt, ntt_inverse, multiply_ntts, poly_add, poly_sub
