@@ -1,11 +1,11 @@
 import hashlib, os
 from hmac import compare_digest
-import fake_kpke as kpke          # plus tard : import kpke
+import kpke
 
 Q = 3329
 # Mettre True quand le vrai K-PKE est branché : le faux K-PKE
 # produit des ek qui ne sont pas des coefficients valides modulo q.
-CHECK_EK_MODULUS = False
+CHECK_EK_MODULUS = True
 
 def G(x): return hashlib.sha3_512(x).digest()
 def H(x): return hashlib.sha3_256(x).digest()
