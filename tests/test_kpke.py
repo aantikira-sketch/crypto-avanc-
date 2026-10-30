@@ -1,7 +1,7 @@
-import pytest
-
 import hashlib
-from encoding import ByteDecode
+
+
+import pytest
 
 from params import ML_KEM_512, ML_KEM_768, ML_KEM_1024
 from kpke import k_pke_keygen, k_pke_encrypt, k_pke_decrypt
@@ -59,25 +59,40 @@ def test_encryption_is_deterministic(p):
     assert c1 == c2
 
 
-
 def test_keygen_intermediate_values():
-    """Vérifie rho, sigma et t_hat avec une graine fixe."""
+    """Vérifie rho, sigma et t_hat pour une graine fixe."""
     d = bytes(range(32))
     p = ML_KEM_512
 
     ek, _ = k_pke_keygen(d, p)
 
-    # Vérification de rho et sigma
+    # Dérivation déterministe de rho et sigma.
     digest = hashlib.sha3_512(d + bytes([p.k])).digest()
     rho = digest[:32]
     sigma = digest[32:]
 
-    assert ek[-32:] == rho
-    assert len(sigma) == 32
+    expected_rho = (
+        "344badd000f8d8c537c48f998f05307c"
+        "ebd1ede0b81c3bc59a065a1b6d63b26c"
+    )
 
-    # Vérification de t_hat, encodé dans la clé publique
+    expected_sigma = (
+        "4e79e79f91f0b030bb5c3cd4668d21a1"
+        "61dc5f139261c0c2f9213b29e5a0ce99"
+    )
+
+    expected_t_hat_sha256 = (
+        "779d3291ad02f336c1c1722816e9631b"
+        "d14c2a338db83d62cbd1684509707231"
+    )
+
+    assert rho.hex() == expected_rho
+    assert sigma.hex() == expected_sigma
+
+    # La clé publique contient t_hat encodé, puis rho.
     encoded_t_hat = ek[:p.dk_pke_size]
-    t_hat = ByteDecode(12, encoded_t_hat[:384])
 
-    assert len(t_hat) == 256
-    assert all(0 <= coefficient < 4096 for coefficient in t_hat)
+    assert hashlib.sha256(encoded_t_hat).hexdigest() == (
+        expected_t_hat_sha256
+    )
+    assert ek[-32:] == rho
