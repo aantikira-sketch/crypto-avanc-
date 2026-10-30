@@ -1,5 +1,8 @@
 import pytest
 
+import hashlib
+from encoding import ByteDecode
+
 from params import ML_KEM_512, ML_KEM_768, ML_KEM_1024
 from kpke import k_pke_keygen, k_pke_encrypt, k_pke_decrypt
 
@@ -54,3 +57,27 @@ def test_encryption_is_deterministic(p):
     c2 = k_pke_encrypt(ek, m, r, p)
 
     assert c1 == c2
+
+
+
+def test_keygen_intermediate_values():
+    """Vérifie rho, sigma et t_hat avec une graine fixe."""
+    d = bytes(range(32))
+    p = ML_KEM_512
+
+    ek, _ = k_pke_keygen(d, p)
+
+    # Vérification de rho et sigma
+    digest = hashlib.sha3_512(d + bytes([p.k])).digest()
+    rho = digest[:32]
+    sigma = digest[32:]
+
+    assert ek[-32:] == rho
+    assert len(sigma) == 32
+
+    # Vérification de t_hat, encodé dans la clé publique
+    encoded_t_hat = ek[:p.dk_pke_size]
+    t_hat = ByteDecode(12, encoded_t_hat[:384])
+
+    assert len(t_hat) == 256
+    assert all(0 <= coefficient < 4096 for coefficient in t_hat)
