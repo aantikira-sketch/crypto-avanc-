@@ -30,3 +30,31 @@ def test_rejet_implicite(p):
 def test_encaps_aleatoire():
     ek, _ = mlkem.keygen(ML_KEM_768)
     assert mlkem.encaps(ek, ML_KEM_768)[1] != mlkem.encaps(ek, ML_KEM_768)[1]
+def test_ek_mauvaise_longueur():
+    ek, _ = mlkem.keygen(ML_KEM_768)
+    with pytest.raises(ValueError):
+        mlkem.encaps(ek[:-1], ML_KEM_768)
+
+def test_c_mauvaise_longueur():
+    ek, dk = mlkem.keygen(ML_KEM_768)
+    _, c = mlkem.encaps(ek, ML_KEM_768)
+    with pytest.raises(ValueError):
+        mlkem.decaps(dk, c[:-1], ML_KEM_768)
+
+def test_dk_hash_incoherent():
+    p = ML_KEM_768
+    ek, dk = mlkem.keygen(p)
+    _, c = mlkem.encaps(ek, p)
+    bad = bytearray(dk)
+    bad[384 * p.k + 5] ^= 1          # on abîme la copie de ek dans dk
+    with pytest.raises(ValueError):
+        mlkem.decaps(bytes(bad), c, p)
+@pytest.mark.parametrize("p", ALL)
+def test_taux_echec(p):
+    echecs = 0
+    for _ in range(1000):
+        ek, dk = mlkem.keygen(p)
+        K, c = mlkem.encaps(ek, p)
+        if mlkem.decaps(dk, c, p) != K:
+            echecs += 1
+    assert echecs == 0
