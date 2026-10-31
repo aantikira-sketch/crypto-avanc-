@@ -7,6 +7,8 @@ L = 1088  # taille d'un chiffré ML-KEM-768
 
 def cmp_early(a, b):
     """Comparaison qui s'arrête au premier octet différent (fuite)."""
+    if len(a) != len(b):
+        return False
     for x, y in zip(a, b):
         if x != y:
             return False
@@ -15,6 +17,8 @@ def cmp_early(a, b):
 
 def cmp_ct(a, b):
     """Comparaison qui parcourt tout, sans branchement sur les données."""
+    if len(a) != len(b):
+        return False
     diff = 0
     for x, y in zip(a, b):
         diff |= x ^ y
